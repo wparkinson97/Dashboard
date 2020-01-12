@@ -671,7 +671,7 @@
 			var dsm = new DatasetManager();
 			var visualTypes = [new VisualType("Bar Chart",createBarChart,createBarChart), new VisualType("Pie Chart",createPieChart,createPieChart),
 				new VisualType("Table",createTable,createTable),new VisualType("Matrix",createMatrix,createMatrix)];//[new VisualType("Bar Chart" createBarChart, createBarChart),new VisualType("Pie Chart", createPieChart, createPieChart),new VisualType("Table", createTable,createTable),new VisualType("Matrix",createMatrix,createMatrix)];
-			d3.json("http://williamtylerparkinson.com/otp.json",function(error,data){
+			d3.json("otp.json",function(error,data){
 				if(error){
 					console.log(error);
 				}
