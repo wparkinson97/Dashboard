@@ -1,0 +1,1256 @@
+<html>
+	<head>
+		<title></title>
+		<script src = "d3.min.js" charset="utf-8"></script>
+		<style>
+			text{
+				
+			}
+			svg{
+				overflow:visible;
+				float:left;
+			}
+			.visualContainer{
+				overflow-y:auto;
+				overflow-x:visible;
+			}
+			.legend{
+				overflow:hidden;
+				width:20%;
+				height:100%;
+				float:left;
+				padding:0px;
+			}
+			.legend ul{
+				margin:0px;
+			}
+			.legend li{
+				list-style-type:none;
+			}
+			ul{
+				padding:0px;
+				margin:0px;
+			}
+			h3{
+				clear:both;
+				display:inline-block;
+				width:100%;
+			}
+			table{
+				table-layout:auto;
+				width:100px;
+				border-collapse:collapse;
+			}
+			.legendColor{
+				column-width:5px;
+			}
+			th{
+				text-align:center;
+			}
+			td{
+				border:solid black 1px;
+			}
+			.dataTable > tr > th{
+				border: solid black 1px;
+				font-weight:bold;
+				padding:4px;
+			}
+			.dataTable{
+				
+				min-width:95%;
+			}
+			.dataTable:parent{
+				height:auto;
+			}
+			#datasetManager.sideBarVisible{
+				float:right;
+				height:100%;
+				width:400px;
+				background-color:black;
+				opacity:.8;
+				display:inline-block;
+				position:fixed;
+				top:0px;
+				right:0px;
+			}
+			#datasetManager.sideBarHidden{
+				float:right;
+				height:auto;
+				width:auto;
+				background-color:black;
+				opacity:.8;
+				display:inline-block;
+				position:fixed;
+				top:0px;
+				right:0px;
+			}
+			#dsMExit{
+				position:absolute;
+				top:0px;
+				left:0px;
+				color:red;
+				font-weight:bold;
+				background-color:gray;
+				padding:4px;
+				opacity:1;
+				border:solid black 1px;
+				text-align:center;
+				vertical-align:middle;
+				content:"X";
+			}
+			#datasetManager.sideBarHidden>#dsMExit{
+				
+				color:green;
+				position:relative;
+				margin:auto;
+				content:"O";
+			}
+			.headerRow{
+				
+			}
+			.rowHeader{
+				font-weight:bold;
+				text-align:center;
+			}
+			td{
+				overflow:none;
+			}
+			.visualControl{
+				display:none;
+				position:absolue;
+				left:50px;
+				top:50px;
+				text-align:center;
+				background-color:#ccc;
+				border:solid 1px black;
+			}
+			.visualControl:hover{
+				background-color:#ddd;
+				font-weight:bold;
+				border:solid 2px black;
+			}
+			.visualControls{
+				width:30px;
+				height:30px;
+			}
+			.visualContainer:hover .visualControl{
+				color:green;
+				display:block;
+			}
+			.visualContainer > *{
+				position:absolue;
+			}
+			.overlay{
+				opacity:.5;
+				background-color:#000;
+				position:fixed;
+				top:0px;
+				left:0px;
+				width:100%;
+				height:100%;
+			}
+			.noScroll{
+				height:100%;
+				display:block;
+				overflow:hidden;
+				position:fixed;
+				top:0px;
+				left:0px;
+			}
+			.settingsModal{
+				position:absolute;
+				margin:auto;
+				width:30%;
+				background-color:#eee;
+				top:25%;
+				left:35%;
+				padding:10px;
+				overflow:scroll;
+			}
+			
+			.exitButton{
+				position:absolute;
+				top:0px;
+				left:0px;
+				color:red;
+				font-weight:bold;
+				background-color:gray;
+				padding:4px;
+				opacity:1;
+				border:solid black 1px;
+				text-align:center;
+				vertical-align:middle;
+				content:"X";
+			}
+			td > select{
+				//width:100%;
+			}
+			.emptycontainer > table{
+				margin:auto;
+			}
+			.emptyContainer{
+				text-align:center;
+				border: dashed black 1px;
+				padding-top:50px;
+			}
+			<!-- .categoryLabels{ -->
+				<!-- overflow:none; -->
+				<!-- text-align:center; -->
+			<!-- } -->
+		</style>
+	</head>
+	<body>
+		<script type = "text/javascript" language="javascript">
+			
+			var idIndex = 0;
+			var color = d3.scale.category20();
+			
+			var aggregateBy, summarizeBy, aggregateValue, ai;
+			
+			//var visualTypes = [new VisualType("Bar Chart" createBarChart, createBarChart),new VisualType("Pie Chart", createPieChart, createPieChart),new VisualType("Table", createTable,createTable),new VisualType("Matrix",createMatrix,createMatrix)];
+			
+			function toggleDatasetManager(visible){
+				var dsme = document.getElementById("datasetManager");
+				if(visible == null){
+					if(dsme.classList.contains("sideBarHidden")){
+						visible = true;
+					}
+					else{
+						visible = false;
+					}
+				}
+				if(visible){
+					document.getElementById("datasetManager").classList.remove("sideBarHidden");
+					document.getElementById("datasetManager").classList.add("sideBarVisible");
+				}
+				else{
+					document.getElementById("datasetManager").classList.remove("sideBarVisible");
+					document.getElementById("datasetManager").classList.add("sideBarHidden");
+				}
+			}
+			
+			function getNewId(){
+				idIndex++;
+				return idIndex;
+			}
+			function groupData(dataset,aggregateBy,aggregateValue,summarizeBy){
+				var aggregatedData = [];
+				var i = 0;
+				for(i; i < aggregateBy.length; i++){
+					if(aggregatedData.length == 0){
+						aggregatedData[0] = {name:aggregateBy[i],fakeData:"fake"};
+					}
+				}
+				
+				
+			}
+			class VisualType{
+				constructor(name,buildCall,updateCall){
+					this.name = name;
+					this.buildCall = buildCall;
+					this.updateCall = updateCall;
+				}	
+			}
+			class DatasetManager{
+				constructor(){
+					this.datasets = [];
+				}
+				addDataset(data,dsName){
+					var index = this.datasets.length;
+					this.datasets.push(new Dataset(data,index,dsName));
+					return index;
+				}
+				getDataset(index){
+					return this.datasets[index];
+				}
+				makeEmptyContainer(elementId){
+					var emptyDiv = document.getElementById(elementId);
+					
+					var o;
+					var dataSetTable = ""
+						+ "<table id = '" + elementId + "_addTable'>"
+							+ "<tr>"
+								+ "<td>Dataset</td>"
+								+ "<td>"
+									+ "<select id = '" + elementId + "_dataset'>";
+									for(o = 0; o < this.datasets.length; o++){
+										dataSetTable += "<option value = '" + this.datasets[o].dsId + "'>" + this.datasets[o].name + "</option>"
+									}
+									dataSetTable += "</select>"
+								+ "</td>"
+							+ "</tr>"
+							+ "<tr>"
+								+ "<td>Visual</td>"
+								+ "<td><select id = '" + elementId + "_visual'>";
+								var vt;
+								for(vt = 0; vt < visualTypes.length; vt++){
+									dataSetTable += "<option value = '" + vt + "'>" + visualTypes[vt].name + "</option>";
+								}
+						dataSetTable += "</table>"
+						+ "<button onclick = \"var v = dsm.getDataset(getElementById('" + elementId + "_dataset').value).addVisual('" + elementId + "',"
+						+ "visualTypes[document.getElementById('" + elementId + "_visual').value].buildCall,visualTypes[document.getElementById('" + elementId + "_visual').value].updateCall);"
+							+ " v.showSettingsModal();"
+							+ " document.getElementById('" + elementId + "').classList.remove('emptycontainer');"
+							+ " document.getElementById('" + elementId + "').innerHTML = ''; \">Add Visual</button>"
+					emptyDiv.innerHTML = dataSetTable;
+				}
+			}			
+			class Dataset{
+				constructor(ds,dsId,name){
+					this.baseDataset = ds;
+					this.filteredDataset = ds;
+					this.visuals = [];
+					this.dsId = dsId;
+					this.name = name;
+				}
+				addVisual(parentTag,buildCall,updateCall,aggregateBy,aggregateValue,summarizeBy){
+					var aggregated;
+					var dsExpress = "aggregated = d3.nest().key(function(d){return d." + aggregateBy + ";}).rollup(function(v){return d3." + summarizeBy + "(v,function(d){return d." + aggregateValue + ";});}).entries(this.filteredDataset);";					
+					<!-- aggregated = d3.nest() -->
+						<!-- .key(function(d){ -->
+								<!-- return d[aggregateBy]; -->
+						<!-- }) -->
+						<!-- .rollup(function(v){ -->
+							<!-- return d3[summarizeBy](v,function(d){ -->
+								<!-- return d[aggregateValue]; -->
+							<!-- }); -->
+						<!-- }).entries(this.filteredDataset);					 -->
+					
+					var me = this;
+					var newVisual = new Visual(
+						parentTag,
+						buildCall,
+						updateCall,
+						getNewId(),
+						aggregateBy,
+						aggregateValue,
+						summarizeBy,
+						this.dsId
+					)
+					this.visuals.push(newVisual);
+					return newVisual;
+				}
+				addNestedVisual(parentTag,buildCall,updateCall,aggregateBy,aggregateValue,summarizeBy){
+					this.parentTag = parentTag;
+					this.buildCall = buildCall;
+					this.updateCall = updateCall;
+					var aggregated;
+					var dsExpress = "aggregated = d3.nest()"
+					var ai = 0;
+					for(ai; ai < aggregateBy.length; ai++){
+						dsExpress += ".key(function(d){return d." + aggregateBy[ai] + ";})";
+					}
+					if(aggregateValue){
+						dsExpress += ".rollup(function(v){return d3." + summarizeBy + "(v,function(d){return d." + aggregateValue + ";});})";
+					}
+					dsExpress += ".entries(this.filteredDataset);";
+					eval(dsExpress);
+					var me = this;
+					var newVisual = new Visual(
+						parentTag,
+						buildCall,
+						updateCall,
+						getNewId(),
+						aggregateBy,
+						aggregateValue,
+						summarizeBy,
+						this.dsId
+					)
+					this.visuals.push(newVisual);
+					return newVisual;
+				}
+				buildVisuals(){
+					var vis;
+					for(var i = 0; i < this.visuals.length; i++){
+						vis = this.visuals[i];
+						this.filteredDataset = this.baseDataset;
+						for(var v = 0; v < this.visuals.length; v++){
+							if(i == v){
+								continue;
+							}
+							for(var f = 0; f < this.visuals[v].filters.length; f++){
+								var me = {me:this,v:v,f:f,vis:vis};
+								this.filteredDataset = this.filteredDataset.filter(this.filterDataset,me);
+							}
+						}
+						//if(v.built == false){
+							var aggregated;
+							<!-- if(vis.aggregateBy != null) -->
+								<!-- eval(vis.dsExpress) -->
+							<!-- else -->
+								<!-- aggregated = this.filteredDataset; -->
+							var aggregated = vis.aggregateData(this.filteredDataset);
+							vis.buildCall(vis,aggregated);
+							vis.built = true;
+							
+							
+						//}
+					}
+					
+				}
+				filterDataset(d){
+					var include;
+									//eval("include = d." + filterBy + " == '" + filterValue + "'");
+					return d[this.me.visuals[this.v].filters.filterBy[this.f]] == this.me.visuals[this.v].filters.filterValue[this.f];
+				}
+				filter(ds){
+					this.filteredDataset = ds;
+					<!-- var dsExpress; -->
+					<!-- this.visuals.forEach(function(Visual){ -->
+						<!-- var aggregated; -->
+						<!-- dsExpress = Visual.dsExpress; -->
+						<!-- eval(dsExpress); -->
+						<!-- Visual.updateCall(aggregated,Visual.parentTag,Visual.id); -->
+					<!-- }); -->
+					for(var i = 0; i < this.visuals.length; i++){
+						var aggregated = this.visuals[i].aggregateData(this.filteredDataset);
+						//this.visuals[i].updateCall(aggregated,this.visuals[i].parentTag,this.visuals[i].id);
+						this.visuals[i].buildCall(this.visuals[i],aggregated);
+					}
+				}
+				addFilter(filterBy,filterValue){
+					this.filteredDataset = this.filteredDataset.filter(function(d){
+						var include;
+						//eval("include = d." + filterBy + " == '" + filterValue + "'");
+						return d[filterBy] == filterValue;
+						//return d
+					});
+					this.buildVisuals();
+				}
+				resetFilters(){
+					this.filteredDataset = this.baseDataset;
+					this.buildVisuals();
+				}
+				getVisualIndex(visual){
+					for(var i = 0; i < this.visuals.length; i++){
+						if(this.visuals[i] === visual){
+							return i;
+						}
+					}
+					return null;
+				}
+			}
+			class Visual{
+			
+				constructor(parentTag,buildCall,updateCall,id,aggregateBy,aggregateValue,summarizeBy,dsId){
+					this.parentTag = parentTag;
+					this.buildCall = buildCall;
+					this.updateCall = updateCall;
+					this.id = id;
+					this.aggregateBy = aggregateBy;
+					this.aggregateValue = aggregateValue;
+					this.dsId = dsId;
+					this.summarizeBy = summarizeBy;
+					
+					this.built = false;
+					
+					//setting with default values
+					this.categoryTitle = aggregateBy;
+					this.measureTitle = aggregateValue;
+					this.visualTitle = summarizeBy + " " + aggregateValue + " by " + aggregateBy;
+					this.showCategories = true;
+					this.showVisualTitle = true;
+					this.showCategoryTitle = true;
+					this.showMeasureTitle = true;
+					this.showDataLabels = true;
+					this.categoryLabelAngle = 0;
+					this.chartWidthRatio = .75;
+					this.chartHeightRatio = .75;
+					
+					this.page = 1;
+					this.pageSize = 20;
+					
+					this.filters = new Filters(dsId);
+				}
+				<!-- aggregateData(dataset){ -->
+					<!-- if(this.aggregateBy && this.summarizeBy && this.aggregateValue){ -->
+						<!-- if(typeof this.aggregateBy == "string"){ -->
+							<!-- var evaluateFunction = new Function('aggregateBy','summarizeBy','aggregateValue','dataset',"return d3.nest().key(function(d){return d[aggregateBy];}).rollup(function(v){return d3[summarizeBy](v,function(d){return d[aggregateValue];})}).entries(dataset);"); -->
+							<!-- return evaluateFunction(this.aggregateBy,this.summarizeBy,this.aggregateValue,dataset); -->
+						<!-- } -->
+						<!-- if(typeof this.aggregateBy == "Object"){ -->
+							<!-- var dsExpress = "return d3.nest()" -->
+							<!-- var ai = 0; -->
+							<!-- for(ai; ai < aggregateBy.length; ai++){ -->
+								<!-- dsExpress += ".key(function(d){return d." + aggregateBy[ai] + ";})"; -->
+							<!-- } -->
+							<!-- if(aggregateValue){ -->
+								<!-- dsExpress += ".rollup(function(v){return d3." + summarizeBy + "(v,function(d){return d." + aggregateValue + ";});})"; -->
+							<!-- } -->
+							<!-- dsExpress += ".entries(this.filteredDataset);"; -->
+							<!-- var evaluateFunction = new Function('aggregateBy','summarizeBy','aggregateValue','dataset','return d3.nest().ke -->
+						<!-- } -->
+					<!-- } -->
+					<!-- return dataset; -->
+				<!-- } -->
+				aggregateData(dataset){
+					
+					//create global versions of class variables
+					aggregateBy = this.aggregateBy;
+					summarizeBy = this.summarizeBy;
+					aggregateValue = this.aggregateValue;
+					
+					if(this.aggregateBy && this.summarizeBy && this.aggregateValue){
+						//if only one aggregator
+						if(typeof this.aggregateBy == "string"){
+							var nester = d3.nest()
+								.key(function(d){
+									return d[aggregateBy];
+								})
+								.rollup(function(v){
+									return d3[summarizeBy](v,function(d){
+										return d[aggregateValue];
+									});
+								})
+								.entries(dataset);
+								
+							aggregateBy = null;
+							aggregateValue = null;
+							summarizeBy = null;
+							
+							return nester;
+						}
+						//assuming array for aggregateBy, so multi level nest
+						if(typeof aggregateBy == "object"){
+							
+							//aggregate function holder
+							var nester = d3.nest();
+							
+							//var ai; // aggregate index
+							//iterate throught aggregates
+							
+							for(ai = 0; ai < aggregateBy.length; ai++){
+								nester.key(new Function("d","return d[\"" + aggregateBy[ai] + "\"];"));
+							}
+							nester.rollup(function(v){
+								return d3[summarizeBy](v,function(d){
+									return d[aggregateValue];
+								});
+							});
+							<!-- nester.rollup(function(v){ -->
+								<!-- return d3[summarizeBy](v,function(d){ -->
+									<!-- return d[aggregateValue]; -->
+								<!-- }); -->
+							<!-- }); -->
+							
+							<!-- ai = null; -->
+							<!-- aggregateBy = null; -->
+							<!-- aggregateValue = null; -->
+							<!-- summarizeBy = null; -->
+							
+							return nester.entries(dataset);
+						}
+					}
+					return dataset;
+				}
+				setHeaders(xHeader,yHeader){
+					this.xHeader = xHeader;
+					this.yHeader = yHeader;
+				}
+				updateVisual(ds){
+					this.updateCall(this.id);
+				}
+				printXHeader(){
+					alert(this.xHeader);
+				}
+				addFilter(filterBy,filterValue){
+					this.filters.addFilter(filterBy,filterValue);
+				}
+				closeSettingsModal(){
+					d3.selectAll(".overlay")
+						.remove();
+					document.getElementById("contentPage").classList.remove("noScroll");
+					
+				}
+				showSettingsModal(me,two,three,four,five){
+					d3.select("body")
+						.append("div")
+						.attr({
+							"id":"overlay",
+							"class":"overlay"
+						});
+				document.getElementById("contentPage").classList.add("noScroll");
+					
+				var modal = d3.select("body")
+					.append("div")
+					.attr({
+						"class":"settingsModal",
+						"id":"tempModal"
+					})
+					.text("test modal");
+					
+					modal.append("span")
+						.attr({
+							"class":"exitButton"
+							
+						})
+						.on("click",function(){
+							d3.selectAll(".overlay")
+								.remove();
+							d3.selectAll(".settingsModal")
+								.remove();
+							document.getElementById("contentPage").classList.remove("noScroll");
+						})
+						.text("X");
+							
+					var table = document.createElement("table");
+					var me = this;
+					var e = 0;
+					for( ; e < Object.keys(this).length; e++){
+						var tableRow = document.createElement("tr");
+						var tableCell = document.createElement("td");
+						tableCell.innerHTML = Object.keys(this)[e];
+						tableRow.appendChild(tableCell);
+						tableCell = document.createElement("td");
+						var text = document.createElement("input");
+						text.type = "text";
+						text.id = Object.keys(this)[e];
+						text.value = Object.values(this)[e];
+						tableCell.appendChild(text);
+						tableRow.appendChild(tableCell);
+						table.appendChild(tableRow);
+					}
+					document.getElementById("tempModal").appendChild(table);
+					var saveButton = document.createElement("button");
+					saveButton.innerHTML = "Save";
+					var onclickEval;
+					eval("onclickEval = function(){ dsm.getDataset(" + this.dsId + ").visuals[" + dsm.getDataset(this.dsId).getVisualIndex(this) + "].saveChanges();}");
+					saveButton.onclick = onclickEval;
+					
+					document.getElementById("tempModal").appendChild(saveButton);
+				}
+				saveChanges(){
+					var e = 0;
+					for( ; e < Object.keys(this).length; e++){
+						var saveKey = Object.keys(this)[e];
+						var saveValue = document.getElementById(saveKey).value;
+						if(typeof this[saveKey] != "function" && typeof this[saveKey] != "object"){
+							if(saveValue == "true")
+								this[saveKey] = true;
+							else if(saveValue == "false")
+								this[saveKey] = false;
+							else if(saveValue == "undefined")
+								this[saveKey] = null;
+							else
+								this[saveKey] = saveValue;
+						}
+					}
+					this.closeSettingsModal();
+					dsm.getDataset(this.dsId).buildVisuals();
+				}
+				
+				
+				
+			}
+			class Filters{
+				constructor(dataSet){
+					this.dataSet = dsm.getDataset(dataSet);
+					this.filterBy = [];
+					this.filterValue = []
+					this.length = 0;
+				}
+				addFilter(filterBy,filterValue){
+					this.filterBy.push(filterBy);
+					this.filterValue.push(filterValue);
+					this.length++;
+					this.dataSet.buildVisuals();
+					
+				}
+				resetFilters(){
+					this.filterBy = [];
+					this.filterValue = [];
+					this.length = 0;
+					this.dataSet.buildVisuals();
+					
+				}
+				
+				
+			}
+
+			var ds;
+			var dsm = new DatasetManager();
+			var visualTypes = [new VisualType("Bar Chart",createBarChart,createBarChart), new VisualType("Pie Chart",createPieChart,createPieChart),
+				new VisualType("Table",createTable,createTable),new VisualType("Matrix",createMatrix,createMatrix)];//[new VisualType("Bar Chart" createBarChart, createBarChart),new VisualType("Pie Chart", createPieChart, createPieChart),new VisualType("Table", createTable,createTable),new VisualType("Matrix",createMatrix,createMatrix)];
+			d3.json("http://williamtylerparkinson.com/otp.json",function(error,data){
+				if(error){
+					console.log(error);
+				}
+				else{
+					ds = new Dataset(data);
+					
+					for(var b = 0; b < data.length; b++){
+						if(data[b].ArrivalOffset < 0){
+							data[b].ArrivalOffset = data[b].ArrivalOffset * -1;
+						}
+					}
+					
+					var otp = dsm.addDataset(data,"OTP");
+					
+					var v = dsm.getDataset(otp).addVisual("div3",createBarChart,createBarChart,"Stop","ArrivalOffset","mean");
+					v.categoryLabelAngle = 75;
+					v.chartHeightRatio = .5
+					v.showDataLabels = false;
+					
+					v = dsm.getDataset(otp).addVisual("div1",createBarChart,createBarChart,"Vehicle","ArrivalOffset","mean");
+					v.categoryLabelAngle = 45;
+
+					//v.showCategories = false;
+					
+					v = dsm.getDataset(otp).addVisual("div2",createPieChart,createPieChart,"Route","ArrivalOffset","mean");
+					v.showDataLabels = false;
+					v = dsm.getDataset(otp).addVisual("div4",createBarChart,createBarChart,"Date","ArrivalOffset","mean");
+					v.categoryLabelAngle = 60;
+					v.chartHeightRatio = .65
+					
+					v = dsm.getDataset(otp).addVisual("div5",createTable,createTable,null,null,null);
+					v.showVisualTitle = false;
+					
+					v = dsm.getDataset(otp).addNestedVisual("div6",createMatrix,createMatrix,["Date","Date"],"ArrivalOffset","mean");
+					
+					
+					dsm.getDataset(otp).buildVisuals();
+					
+					var emptyContainers = document.getElementsByClassName('emptycontainer');
+					var i;
+					for(i = 0; i < emptyContainers.length; i++){
+						dsm.makeEmptyContainer(emptyContainers[i].id);
+					}
+				}
+			});
+			
+			function createBarChart(v,ds){
+				
+				if(v.built){
+					d3.select("#" + v.parentTag)
+						.html("");
+				}
+				
+				var visControls = d3.select("#" + v.parentTag)
+					.append("div")
+					.attr({
+						"class":"visualControls"
+					});
+					
+				visControls.append("div")
+					.text("VS")
+					.attr({
+						"class":"visualControl",
+						"onclick":"dsm.getDataset(" + v.dsId + ").visuals[" + dsm.getDataset(v.dsId).getVisualIndex(v) + "].showSettingsModal();"
+					});
+					
+					
+				
+				
+				var colorScale = d3.scale.linear()
+					.domain([
+						d3.min(ds,function(d){return d.values;}),
+						d3.max(ds,function(d){return d.values;})
+					])
+					.range([100,255]);
+				
+				var parent = document.getElementById(v.parentTag);
+				var width = parent.offsetWidth;
+				var height = parent.offsetHeight;
+				
+				var chartWidth = width * v.chartWidthRatio;
+				var chartHeight = height * v.chartHeightRatio;
+				
+				var chartTopOffset = 35;
+				var chartLeftOffset = 0;
+				
+				var columnWidth = chartWidth / ds.length;
+				
+				var yScale = d3.scale.linear()
+					.domain([
+						<!-- d3.min(ds,function(d){ -->
+							<!-- return d.values; -->
+						<!-- }), -->
+						0,
+						d3.max(ds,function(d){
+							return Math.abs(d.values);
+						})
+					])
+					.range([0,chartHeight]);
+					
+				if(v.showVisualTitle){
+					d3.select("#" + v.parentTag)
+						.append("h3")
+						.style({
+							"position":"absolute",
+							"margin":"0px",
+							"display":"inline",
+							"width":width,
+							"text-align":"center"
+						})
+						.text(v.visualTitle);
+				}
+				var chart = d3.select("#" + v.parentTag)
+					.append("svg")
+					.attr({
+						"width":chartWidth,
+						"height":chartHeight,
+						"id":"visual_" + v.id
+					});
+					
+				chart.selectAll("rect")
+					.data(ds)
+					.enter()
+					.append("rect")
+						.attr({
+							"x":function(d,i){
+								return i * (columnWidth) + chartLeftOffset;
+							},
+							"onclick":function(d,i){
+								if(v.filters.length == 0){
+									return "dsm.getDataset(" + v.dsId + ").visuals[" + dsm.getDataset(v.dsId).getVisualIndex(v) + "].addFilter('" + v.aggregateBy + "','" + d.key + "')";
+								}
+								else{
+									if(d.key != v.filters.filterValue[0]){
+										return "dsm.getDataset(" + v.dsId + ").visuals[" + dsm.getDataset(v.dsId).getVisualIndex(v) + "].filters.resetFilters(); " + "dsm.getDataset(" + v.dsId + ").visuals[" + dsm.getDataset(v.dsId).getVisualIndex(v) + "].addFilter('" + v.aggregateBy + "','" + d.key + "')";
+									}
+									else{
+										return "dsm.getDataset(" + v.dsId + ").visuals[" + dsm.getDataset(v.dsId).getVisualIndex(v) + "].filters.resetFilters()";
+									}
+								}
+								//return "dsm.getDataset(" + v.dsId + ").addFilter('" + v.aggregateBy + "',\"" + d.key + "\")";
+							}
+						})
+						.attr("y",function(d,i){
+							return (chartHeight - (yScale(Math.abs(d.values)) || 0)) + chartTopOffset;
+						})
+						.attr("width", chartWidth / ds.length)
+						.attr("height",function(d,i){return yScale(Math.abs(d.values)) || 0;
+						})
+						.style({
+							"fill-opacity":function(d){
+								if(v.filters.length == 0){
+									return 
+								}
+								else{
+									if(d.key == v.filters.filterValue[0]){
+										return "1";
+									}
+									else{
+										return ".15";
+									}
+								}
+							}
+						})
+						.style("fill",function(d){
+							return color(d.key);
+							//return "rgb(0,255,200)";
+							if(v.filters.length == 0){
+								return "rgb(0,255,200)";
+							}
+							else{
+								if(d.key == v.filters.filterValue[0]){
+									return "rgb(0,255,200)";
+								}
+								else{
+									return "rgb(230,255,230)";
+								}
+							}
+						})
+						.style("stroke","black");
+						
+						
+				if(v.showCategories){
+					chart.selectAll(".categoryLabels")
+						.data(ds)
+						.enter()
+						.append("text")
+							.attr({
+								"x":function(d,i){
+									return i * columnWidth + (columnWidth / 2) + chartLeftOffset;
+								},
+								"y":function(d,i){
+									return chartHeight + 15 + chartTopOffset;
+								},
+								"transform":function(d,i){
+									return "rotate(" + v.categoryLabelAngle + "," + (i * columnWidth + (columnWidth / 2) + chartLeftOffset) + "," + (chartHeight + 15 + chartTopOffset) + ")";
+								},
+								"class":"categoryLabels"
+							})
+							.style("text-anchor","start")
+							.text(function(d){return d.key;});
+				}
+				if(v.showDataLabels){
+					chart.selectAll(".dataLabels")
+						.data(ds)
+						.enter()
+						.append("text")
+							.attr({
+								"x":function(d,i){
+									return i * columnWidth + chartLeftOffset;
+								},
+								"y":function(d,i){
+									return (chartHeight - (yScale(Math.abs(d.values)) || 0)) + chartTopOffset - 5;
+								},
+								"width":columnWidth
+							})
+							.style("overflow","none")
+							.text(function(d,i){
+								return Math.round(Math.abs(d.values));
+							});
+				}
+				
+				
+				
+				return v.id;
+			}
+			function createPieChart(v,ds){
+					
+				
+				if(v.built){
+					d3.select("#" + v.parentTag)
+						.html("");
+				}
+				else{
+					v.colorScale = d3.scale.linear()
+					.domain([
+						d3.min(ds,function(d){return d.values;}),
+						d3.max(ds,function(d){return d.values;})
+					])
+					.range([100,255]);
+				}
+				var colorScale = v.colorScale;
+				
+				var parent = document.getElementById(v.parentTag);
+				var width = parent.offsetWidth;
+				var height = parent.offsetHeight;
+				
+				var chartWidth = width * v.chartWidthRatio;
+				var chartHeight = height * v.chartHeightRatio;
+				
+				var chartTopOffset = 35;
+				var chartLeftOffset = 0;				
+			
+				if(v.showVisualTitle){
+					d3.select("#" + v.parentTag)
+						.append("h3")
+						.style({
+							"position":"absolute",
+							"margin":"0px",
+							"display":"inline",
+							"width":width,
+							"text-align":"center"
+						})
+						.text(v.visualTitle);
+				}
+			
+				var radius = Math.min(chartWidth, chartHeight) / 2;
+				
+				//var color = d3.scale.ordinal(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+				//var color = d3.scale.category20();
+				
+				
+				
+				var arc = d3.svg.arc()
+					.outerRadius(radius - 10)
+					.innerRadius(radius - 70);
+					
+				var pie = d3.layout.pie()
+					.sort(null)
+					.value(function(d){if(d.values > 0 || d.values < 0){return d.values;}return 0;});
+					
+				var pieChart = d3.select("#" + v.parentTag)
+					.append("svg")
+					.attr({
+						"width":chartWidth,
+						"height":chartHeight,
+						"transform":"translate(" + chartLeftOffset + "," + chartTopOffset +")"
+					})
+					.append("g")
+						.attr("class","arc")
+						.attr("transform", "translate(" + chartWidth / 2 + "," + chartHeight / 2 + ")");
+				
+				var g = pieChart.selectAll(".arc")
+						.data(pie(ds))
+					.enter().append("g")
+					.attr("class","arc");
+				
+				g.append("path")
+					.attr({
+					
+					
+					"onclick":function(d,i){
+								if(v.filters.length == 0){
+									return "dsm.getDataset(" + v.dsId + ").visuals[" + dsm.getDataset(v.dsId).getVisualIndex(v) + "].addFilter('" + v.aggregateBy + "','" + d.data.key + "')";
+								}
+								else{
+									if(d.data.key != v.filters.filterValue[0]){
+										return "dsm.getDataset(" + v.dsId + ").visuals[" + dsm.getDataset(v.dsId).getVisualIndex(v) + "].filters.resetFilters(); " + "dsm.getDataset(" + v.dsId + ").visuals[" + dsm.getDataset(v.dsId).getVisualIndex(v) + "].addFilter('" + v.aggregateBy + "','" + d.data.key + "')";
+									}
+									else{
+										return "dsm.getDataset(" + v.dsId + ").visuals[" + dsm.getDataset(v.dsId).getVisualIndex(v) + "].filters.resetFilters()";
+									}
+								}
+								//return "dsm.getDataset(" + v.dsId + ").addFilter('" + v.aggregateBy + "',\"" + d.key + "\")";
+							},
+					"fill":function(d){
+						var col = color(d.data.key);
+						return col;
+					},
+					"d":arc,
+					"fill-opacity":function(d){
+						if(v.filters.length == 0){
+							return "1";
+						}
+						if(d.data.key != v.filters.filterValue[0]){
+							return ".25";
+						}
+						else{
+							return "1";
+						}
+					}
+					
+					});
+					
+				if(v.showDataLabels){
+					g.append("text")
+						.attr("transform",function(d){return "translate(" + arc.centroid(d) + ")";})
+						.attr("dy",".35em")
+						.text(function(d) {return Math.round(d.value).toLocaleString();});
+				}
+				if(v.showCategories){
+					<!-- var legend = d3.select("#" + v.parentTag) -->
+						<!-- .append("div") -->
+							<!-- .attr("class","legend") -->
+						<!-- .append("ul") -->
+						<!-- .selectAll("li") -->
+						<!-- .data(ds) -->
+						<!-- .enter() -->
+						<!-- .append("li") -->
+						<!-- .html(function(d){ -->
+							<!-- return "<span style='background: " + color(d.values) + "'>" + d.key + "</span>"; -->
+						<!-- }); -->
+					var legendTable = d3.select("#" + v.parentTag)
+						.append("table");
+					legendTable.append("tr")
+						.append("th")
+						.attr({
+							"colspan":"2"
+						})
+						.html("Legend");
+					var row = legendTable.selectAll(".legendRow")
+						.data(ds)
+						.enter()
+						.append("tr");
+					row.append("td")
+						.attr({
+							"style":function(d){
+								return "background:" + color(d.key)
+							},
+							"class":"legendColor"
+						})
+					row.append("td")
+						.html(function(d){
+							return d.key;
+						})
+				}
+					
+			}
+			
+			function createTable(v,ds){
+			
+				var dst = ds.slice();
+				dst = dst.splice(0,20);
+				if(v.built){
+					d3.select("#" + v.parentTag)
+						.html("");
+				}
+				
+				var parent = document.getElementById(v.parentTag);
+				var width = parent.offsetWidth;
+				var height = parent.offsetHeight;
+				
+				var chartWidth = width * v.chartWidthRatio;
+				var chartHeight = height * v.chartHeightRatio;
+				
+				var chartTopOffset = 35;
+				var chartLeftOffset = 0;				
+			
+				if(v.showVisualTitle){
+					d3.select("#" + v.parentTag)
+						.append("h3")
+						.style({
+							"position":"absolute",
+							"margin":"0px",
+							"display":"inline",
+							"width":width,
+							"text-align":"center"
+						})
+						.text(v.visualTitle);
+				}
+				var toolBar = d3.select("#" + v.parentTag)
+					.append("div")
+					.style({
+						"width":"100%",
+						"padding":"2px",
+						"padding-right":"4px",
+						"position":"absolue",
+						"height":"6%",
+						"background-color":"#dddddd"
+					});
+					
+				
+				toolBar.append("span")
+					.style({
+						"float":"right",
+						"font-size":"2em",
+						"vertical-align":"middle"
+					})
+					.html('&#8250;');
+					
+				toolBar.append("input")
+					.attr({
+						"type":"text",
+						"value":"0",
+						"name":"page"
+					})
+					.style({
+						"float":"right",
+						"width":"1.5em",
+						"text-align":"center"
+					});
+				
+					
+				var table = d3.select("#" + v.parentTag)
+					.append("table")
+					.attr("class","dataTable");
+				var headerRow = table
+					.append("tr")
+					.attr("class","headerRow");
+				headerRow.selectAll("th")
+					.data(Object.keys(dst[0]))
+					.enter()
+					.append("th")
+					.html(function(d){
+						return d;
+					});
+				var rows = table.selectAll('.dataRow')
+					.data(dst)
+					.enter()
+					.append("tr")
+					.attr({
+						class:".dataRow"
+					})
+					.selectAll("td")
+					.data(function(d){
+						return Object.values(d);
+					})
+					.enter()
+					.append("td")
+					.text(function(d){
+						return d;
+					});
+			}
+			function createMatrix(v,ds){
+			
+				if(v.built){
+					d3.select("#" + v.parentTag)
+						.html("");
+				}
+				var yHeaders = [];
+				var groupIndex = 0;
+				for(groupIndex; groupIndex < ds.length; groupIndex++){
+					var subGroupIndex = 0;
+					for(subGroupIndex; subGroupIndex < ds[groupIndex]["values"].length;subGroupIndex++){
+						if(yHeaders.indexOf(ds[groupIndex]["values"][subGroupIndex]["key"]) == -1){
+							yHeaders[yHeaders.length] = ds[groupIndex]["values"][subGroupIndex]["key"];
+						}
+					}
+				}
+				yHeaders.sort(d3.ascending);
+				var i = 0;
+				for(i; i < ds.length; i++){
+					var n = 0;
+					ds[i]["values"].sort(function(x,y){
+						return d3.ascending(x.key,y.key);
+					});
+					for(n; n < yHeaders.length;n++){
+						var localArray = {key:"",values:[]};
+						if(ds[i]["values"].length > n){
+							localArray = ds[i]["values"][n];
+						}
+						if(localArray["key"] != yHeaders[n]){
+							ds[i]["values"].splice(n,0,{key:yHeaders[n],values:0});
+						}
+					}
+				}
+				
+				var table = d3.select("#" + v.parentTag)
+					.append("table")
+					.attr({
+						class:"dataTable"
+					});
+					
+				var tableHeaders = table.append("tr")
+					.attr({
+						class:"headerRow"
+					});
+				tableHeaders.append("th").text("Headers");
+				tableHeaders.selectAll(".columnHeader")
+					.data(yHeaders)
+					.enter()
+					.append("th").
+					attr({
+						class:"colHeader"
+					})
+					.text(function(d){
+						return d;
+					});
+					
+				table.selectAll(".dataRow")
+					.data(ds)
+					.enter()
+					.append("tr")
+					.attr({
+						class:"datarow"
+					})
+					.append("td")
+					.attr({
+						class:"rowHeader"
+					})
+					.text(function(d){
+						return d.key;
+					});
+					
+				table.selectAll(".dataRow")
+					.selectAll(".dataCell")
+					.data(function(ds,i){
+						return ds["values"];
+					})
+					.enter()
+					.append("td")
+					.text(function(d){
+						if(d.values)
+							return Math.round(d.values * 100) / 100;
+						return 0;
+					});
+					
+			}
+			function filterDS(){
+				ds.filter(ds.baseDataset.filter(function(d){
+					return d.Route == "Health Science Express";
+				}));
+			}
+		</script>
+		<div id = "contentPage">
+			<div id = "div1" class = "visualContainer" style="width:600px;height:500px;display:inline-block;"></div>
+			<div id = "div2" class = "visualContainer" style="width:600px;height:500px;display:inline-block;"></div>
+			<div id = "div3" class = "visualContainer" style="width:600px;height:500px;display:inline-block;"></div>
+			<div id = "div4" class = "visualContainer" style="width:1000;height:400px;display:inline-block;"></div>
+			<div id = "div5" class = "visualContainer" style="width:100%;height:400px;display:inline-block;"></div>
+			<div id = "div6" class = "visualContainer" style="width:100%;height:400px;display:inline-block;"></div>
+			<div id = "div7" class = "visualContainer emptycontainer" style="width:600px;height:500px;display:inline-block;"></div>
+			<div id = "div8" class = "visualContainer emptycontainer" style="width:600px;height:500px;display:inline-block;"></div>
+			<div id = "div9" class = "visualContainer emptycontainer" style="width:600px;height:500px;display:inline-block;"></div>
+			<input type = "button" style="display:block" onclick="dsm.getDataset(0).visuals.forEach(function(visual){visual.filters.resetFilters();})" value="Reset Filters"></input>
+			<div id = "datasetManager" class ="sideBarHidden">
+				<span id="dsMExit" onclick = "toggleDatasetManager();">X</span>
+		</div>
+		<span>&#10151;</span>
+		</div>
+	</body>
+</html>
